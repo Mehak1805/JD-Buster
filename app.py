@@ -320,8 +320,6 @@ def load_model():
     return spacy.load("en_core_web_sm")
 
 nlp = load_model()
-
-# --- REFINED LOGIC ---
 def decode_jd(text):
     doc = nlp(text)
     must_haves = []
@@ -344,12 +342,10 @@ def decode_jd(text):
         elif any(m in low_sent for m in must_triggers):
             must_haves.append(sent)
 
-    # Enhanced blacklist with common non-tech terms
     blacklist = ['Google', 'India', 'Interns', 'Internship', 'Policy', 'Local', 'Social', 'CVs', 'Ads',
                  'Accommodations', 'Equal', 'Opportunity', 'Employer', 'Background', 'Check', 'Microsoft',
                  'Careers', 'Interview', 'Application', 'Position', 'Company', 'Team', 'Office', 'Work']
     
-    # Tech keywords to whitelist (to ensure we catch real tech)
     tech_keywords = ['python', 'java', 'javascript', 'react', 'angular', 'vue', 'node', 'sql', 'aws', 
                      'docker', 'kubernetes', 'cloud', 'azure', 'gcp', 'git', 'api', 'rest', 'graphql',
                      'mongodb', 'postgres', 'mysql', 'redis', 'elasticsearch', 'kafka', 'hadoop', 'spark',
@@ -358,12 +354,10 @@ def decode_jd(text):
     tools = [ent.text for ent in doc.ents if ent.label_ in ["ORG", "PRODUCT"]]
     clean_tools = list(set([t for t in tools if t not in blacklist and len(t) > 2 and t.lower() not in blacklist]))
     
-    # Additional filtering: keep only if it looks like tech
     tech_patterns = ['js', 'sql', 'api', 'db', 'framework', 'library', 'platform', 'tool', 'service']
     filtered_tools = [t for t in clean_tools if any(pattern in t.lower() for pattern in tech_patterns) or 
                       any(keyword in t.lower() for keyword in tech_keywords)]
     
-    # If we filtered too aggressively, return the original clean list with just blacklist removed
     final_tools = filtered_tools if filtered_tools else clean_tools
     
     return must_haves, nice_to_haves, final_tools
@@ -446,4 +440,5 @@ if decode_pressed:
         st.markdown('</div>', unsafe_allow_html=True)
         
     else:
+
         st.error("⚠️ Please paste the job description first!")
